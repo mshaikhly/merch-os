@@ -104,7 +104,9 @@ export default function Home() {
         throw new Error(data?.error || "Failed to generate directions.");
       }
 
-      setDirections(data.directions || []);
+      const generatedDirections = data.directions || [];
+      setDirections(generatedDirections);
+      setSelectedDirection(generatedDirections[0] || null);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to generate directions.";
@@ -239,6 +241,12 @@ export default function Home() {
               </div>
             )}
 
+            {directions.length > 0 && !selectedDirection && (
+              <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800">
+                Select a direction before creating the Notion workspace.
+              </div>
+            )}
+
             {directions.length > 0 && (
               <>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -254,6 +262,13 @@ export default function Home() {
                   </button>
                 </div>
 
+                {selectedDirection && (
+                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm">
+                    <span className="font-medium">Selected direction:</span>{" "}
+                    {selectedDirection.title}
+                  </div>
+                )}
+
                 <div className="grid gap-4 xl:grid-cols-2">
                   {directions.map((direction) => {
                     const isSelected = selectedDirection?.id === direction.id;
@@ -262,11 +277,10 @@ export default function Home() {
                       <button
                         key={direction.id}
                         onClick={() => setSelectedDirection(direction)}
-                        className={`rounded-2xl border p-5 text-left shadow-sm transition ${
-                          isSelected
+                        className={`rounded-2xl border p-5 text-left shadow-sm transition ${isSelected
                             ? "border-black ring-2 ring-black"
                             : "border-neutral-200 hover:border-neutral-400"
-                        }`}
+                          }`}
                       >
                         <div className="mb-3 flex items-start justify-between gap-3">
                           <div>
@@ -300,14 +314,19 @@ export default function Home() {
             )}
 
             {workspace && (
-              <div className="rounded-2xl border border-neutral-200 p-6 shadow-sm">
-                <h2 className="text-xl font-semibold">Workspace Created</h2>
-                <p className="mt-2 text-sm text-neutral-600">{workspace.title}</p>
+              <div className="rounded-2xl border border-green-200 bg-green-50 p-6 shadow-sm">
+                <h2 className="text-xl font-semibold text-green-900">
+                  Workspace created successfully
+                </h2>
+                <p className="mt-2 text-sm text-green-800">
+                  Your Notion execution workspace is ready.
+                </p>
+                <p className="mt-2 text-sm text-neutral-700">{workspace.title}</p>
                 <a
                   href={workspace.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 inline-block rounded-2xl border border-black px-4 py-3 font-medium transition hover:bg-black hover:text-white"
+                  className="mt-4 inline-block rounded-2xl border border-black bg-white px-4 py-3 font-medium transition hover:bg-black hover:text-white"
                 >
                   Open in Notion
                 </a>
@@ -335,7 +354,9 @@ function Field({
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Info({ label, value }: { label: string; value?: string }) {
+  if (!value?.trim()) return null;
+
   return (
     <div>
       <p className="font-medium">{label}</p>

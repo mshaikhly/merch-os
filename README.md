@@ -1,2 +1,2 @@
 # merch-os
-AI-powered Merch Operating System that turns a merch brief into design directions and automatically creates an execution workspace in Notion using MCP.
+An AI-powered merch workflow that uses Notion MCP to turn a client brief into an organised Notion workspace with docs, design directions, tasks, feedback, and production tracking.
