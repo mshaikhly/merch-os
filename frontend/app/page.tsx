@@ -10,6 +10,8 @@ type Brief = {
   colourPreferences: string;
   designNotes: string;
   garmentTypes: string;
+  projectStartDate: string;
+  launchDate: string;
 };
 
 type Direction = {
@@ -33,6 +35,8 @@ type Workspace = {
   pageId: string;
   url: string;
   title: string;
+  productionDatabaseUrl?: string;
+  milestonesDatabaseUrl?: string;
 };
 
 const initialBrief: Brief = {
@@ -44,6 +48,8 @@ const initialBrief: Brief = {
   designNotes:
     "Designs should feel premium and identity-driven. Avoid overly complex graphics. Focus on bold typography, subtle symbolism, and wearable everyday pieces.",
   garmentTypes: "hoodie, t-shirt",
+  projectStartDate: "",
+  launchDate: "",
 };
 
 export default function Home() {
@@ -81,6 +87,8 @@ export default function Home() {
       .split(",")
       .map((v) => v.trim())
       .filter(Boolean),
+    projectStartDate: brief.projectStartDate,
+    launchDate: brief.launchDate,
   });
 
   const generateDirections = async () => {
@@ -123,7 +131,7 @@ export default function Home() {
       setError("");
       setLoadingWorkspace(true);
 
-      const response = await fetch(`${apiBaseUrl}/create-workspace`, {
+      const response = await fetch(`${apiBaseUrl}/create-workspace-mcp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +145,9 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || "Failed to create workspace.");
+        throw new Error(
+          data?.details || data?.error || "Failed to create workspace."
+        );
       }
 
       setWorkspace(data.workspace);
@@ -151,24 +161,37 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <div className="mb-10">
-          <h1 className="text-4xl font-bold tracking-tight">Merch OS</h1>
-          <p className="mt-2 text-sm text-neutral-600">
-            Turn a merch brief into AI-generated design directions and a Notion
-            execution workspace.
-          </p>
+        <div className="mb-10 flex flex-col gap-4 border-b border-white/10 pb-8">
+          <div className="inline-flex w-fit items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/70">
+            AI-powered merch workflow
+          </div>
+
+          <div>
+            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+              Merch OS
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/60 sm:text-base">
+              Turn a merch brief into AI-generated design directions and a Notion
+              execution workspace with production tasks and milestone planning.
+            </p>
+          </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[420px_1fr]">
-          <section className="rounded-2xl border border-neutral-200 p-6 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold">Client Brief</h2>
+        <div className="grid gap-8 lg:grid-cols-[430px_1fr]">
+          <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold">Client Brief</h2>
+              <p className="mt-1 text-sm text-white/50">
+                Define the brand, launch timing, and creative constraints.
+              </p>
+            </div>
 
             <div className="space-y-4">
               <Field label="Brand Name">
                 <input
-                  className="w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
                   value={brief.brandName}
                   onChange={(e) => handleChange("brandName", e.target.value)}
                 />
@@ -176,7 +199,7 @@ export default function Home() {
 
               <Field label="Audience">
                 <textarea
-                  className="w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
                   value={brief.audience}
                   onChange={(e) => handleChange("audience", e.target.value)}
                   rows={3}
@@ -185,7 +208,7 @@ export default function Home() {
 
               <Field label="Brand Values (comma separated)">
                 <input
-                  className="w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
                   value={brief.brandValues}
                   onChange={(e) => handleChange("brandValues", e.target.value)}
                 />
@@ -193,7 +216,7 @@ export default function Home() {
 
               <Field label="Style Preferences (comma separated)">
                 <input
-                  className="w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
                   value={brief.stylePreferences}
                   onChange={(e) => handleChange("stylePreferences", e.target.value)}
                 />
@@ -201,15 +224,37 @@ export default function Home() {
 
               <Field label="Colour Preferences (comma separated)">
                 <input
-                  className="w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
                   value={brief.colourPreferences}
                   onChange={(e) => handleChange("colourPreferences", e.target.value)}
                 />
               </Field>
 
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Project Start Date">
+                  <input
+                    type="date"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none transition [color-scheme:dark] focus:border-white/30"
+                    value={brief.projectStartDate}
+                    onChange={(e) =>
+                      handleChange("projectStartDate", e.target.value)
+                    }
+                  />
+                </Field>
+
+                <Field label="Launch Date">
+                  <input
+                    type="date"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none transition [color-scheme:dark] focus:border-white/30"
+                    value={brief.launchDate}
+                    onChange={(e) => handleChange("launchDate", e.target.value)}
+                  />
+                </Field>
+              </div>
+
               <Field label="Design Notes">
                 <textarea
-                  className="w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
                   value={brief.designNotes}
                   onChange={(e) => handleChange("designNotes", e.target.value)}
                   rows={4}
@@ -218,7 +263,7 @@ export default function Home() {
 
               <Field label="Garment Types (comma separated)">
                 <input
-                  className="w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
                   value={brief.garmentTypes}
                   onChange={(e) => handleChange("garmentTypes", e.target.value)}
                 />
@@ -227,7 +272,7 @@ export default function Home() {
               <button
                 onClick={generateDirections}
                 disabled={loadingDirections}
-                className="w-full rounded-2xl border border-black px-4 py-3 font-medium transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-2xl border border-white/20 bg-white px-4 py-3 font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loadingDirections ? "Generating..." : "Generate Directions"}
               </button>
@@ -236,13 +281,13 @@ export default function Home() {
 
           <section className="space-y-6">
             {error && (
-              <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+              <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
                 {error}
               </div>
             )}
 
             {directions.length > 0 && !selectedDirection && (
-              <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800">
+              <div className="rounded-3xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
                 Select a direction before creating the Notion workspace.
               </div>
             )}
@@ -250,11 +295,17 @@ export default function Home() {
             {directions.length > 0 && (
               <>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <h2 className="text-2xl font-semibold">Generated Directions</h2>
+                  <div>
+                    <h2 className="text-2xl font-semibold">Generated Directions</h2>
+                    <p className="mt-1 text-sm text-white/50">
+                      Pick one direction and generate the Notion workspace.
+                    </p>
+                  </div>
+
                   <button
                     onClick={createWorkspace}
                     disabled={!selectedDirection || loadingWorkspace}
-                    className="rounded-2xl border border-black px-4 py-3 font-medium transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-2xl border border-white/20 bg-white px-4 py-3 font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loadingWorkspace
                       ? "Creating Workspace..."
@@ -263,8 +314,8 @@ export default function Home() {
                 </div>
 
                 {selectedDirection && (
-                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm">
-                    <span className="font-medium">Selected direction:</span>{" "}
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/80">
+                    <span className="font-medium text-white">Selected direction:</span>{" "}
                     {selectedDirection.title}
                   </div>
                 )}
@@ -277,21 +328,29 @@ export default function Home() {
                       <button
                         key={direction.id}
                         onClick={() => setSelectedDirection(direction)}
-                        className={`rounded-2xl border p-5 text-left shadow-sm transition ${isSelected
-                            ? "border-black ring-2 ring-black"
-                            : "border-neutral-200 hover:border-neutral-400"
-                          }`}
+                        className={`rounded-3xl border p-5 text-left transition ${
+                          isSelected
+                            ? "border-white/40 bg-white/[0.06] ring-1 ring-white/30"
+                            : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]"
+                        }`}
                       >
-                        <div className="mb-3 flex items-start justify-between gap-3">
+                        <div className="mb-4 flex items-start justify-between gap-3">
                           <div>
-                            <h3 className="text-lg font-semibold">
+                            <h3 className="text-lg font-semibold text-white">
                               {direction.title}
                             </h3>
-                            <p className="mt-1 text-sm text-neutral-600">
+                            <p className="mt-1 text-sm text-white/55">
                               {direction.hook}
                             </p>
                           </div>
-                          <span className="rounded-full border border-neutral-300 px-2 py-1 text-xs">
+
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs ${
+                              isSelected
+                                ? "border border-white/20 bg-white text-black"
+                                : "border border-white/10 bg-white/[0.04] text-white/70"
+                            }`}
+                          >
                             {isSelected ? "Selected" : "Select"}
                           </span>
                         </div>
@@ -314,22 +373,73 @@ export default function Home() {
             )}
 
             {workspace && (
-              <div className="rounded-2xl border border-green-200 bg-green-50 p-6 shadow-sm">
-                <h2 className="text-xl font-semibold text-green-900">
-                  Workspace created successfully
-                </h2>
-                <p className="mt-2 text-sm text-green-800">
-                  Your Notion execution workspace is ready.
-                </p>
-                <p className="mt-2 text-sm text-neutral-700">{workspace.title}</p>
-                <a
-                  href={workspace.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-block rounded-2xl border border-black bg-white px-4 py-3 font-medium transition hover:bg-black hover:text-white"
-                >
-                  Open in Notion
-                </a>
+              <div className="overflow-hidden rounded-3xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-white/[0.04] to-white/[0.02] shadow-[0_0_0_1px_rgba(16,185,129,0.08)]">
+                <div className="border-b border-white/10 px-6 py-5">
+                  <div className="mb-3 inline-flex items-center rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-emerald-200">
+                    Workspace Ready
+                  </div>
+
+                  <h2 className="text-2xl font-semibold text-white">
+                    Workspace created successfully
+                  </h2>
+
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">
+                    Your Notion workspace has been created with the brief,
+                    selected direction, dynamic production tasks, and project milestones.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 px-6 py-5 md:grid-cols-3">
+                  <SuccessStat
+                    label="Workspace"
+                    value="Created"
+                  />
+                  <SuccessStat
+                    label="Production Tasks"
+                    value={workspace.productionDatabaseUrl ? "Ready" : "Pending"}
+                  />
+                  <SuccessStat
+                    label="Milestones"
+                    value={workspace.milestonesDatabaseUrl ? "Ready" : "Pending"}
+                  />
+                </div>
+
+                <div className="border-t border-white/10 px-6 py-5">
+                  <p className="text-sm text-white/75">{workspace.title}</p>
+
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a
+                      href={workspace.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center rounded-2xl border border-white/20 bg-white px-4 py-3 font-medium text-black transition hover:bg-white/90"
+                    >
+                      Open Workspace
+                    </a>
+
+                    {workspace.productionDatabaseUrl && (
+                      <a
+                        href={workspace.productionDatabaseUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-3 font-medium text-white transition hover:border-white/30 hover:bg-white/[0.08]"
+                      >
+                        Open Production Tasks
+                      </a>
+                    )}
+
+                    {workspace.milestonesDatabaseUrl && (
+                      <a
+                        href={workspace.milestonesDatabaseUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-3 font-medium text-white transition hover:border-white/30 hover:bg-white/[0.08]"
+                      >
+                        Open Milestones
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </section>
@@ -348,7 +458,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-medium">{label}</span>
+      <span className="mb-2 block text-sm font-medium text-white/80">{label}</span>
       {children}
     </label>
   );
@@ -359,8 +469,23 @@ function Info({ label, value }: { label: string; value?: string }) {
 
   return (
     <div>
-      <p className="font-medium">{label}</p>
-      <p className="text-neutral-600">{value}</p>
+      <p className="font-medium text-white">{label}</p>
+      <p className="text-white/55">{value}</p>
+    </div>
+  );
+}
+
+function SuccessStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <p className="text-xs uppercase tracking-[0.18em] text-white/45">{label}</p>
+      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
     </div>
   );
 }
